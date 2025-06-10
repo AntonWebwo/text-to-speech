@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <!--
+    Автор: Антон Виноградов
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Озвучить текст</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <style type="text/css">
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #333;
+            color: #fff;
+        }
+
+        .text-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #444;
+            border: 1px solid #555;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .text-message {
+            border-bottom: 1px solid #555;
+            padding-bottom: 24px;
+            margin-bottom: 20px;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        .message {
+            color: #fff;
+            margin-top: 14px;
+        }
+
+        form {
+            padding: 20px;
+            background-color: #444;
+            border: 1px solid #555;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #text-input {
+            color: white;
+            display: flex;
+            padding: 10px;
+            background-color: #444;
+            border: 1px solid #555;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            flex-direction: column;
+            position: relative;
+            width: 97%;
+            height: 85px;
+        }
+
+        .btn-area {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .button {
+            top: 4px;
+            position: relative;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .send {
+            background-color: #4CAF50;
+        }
+
+        #download-button {
+            background-color: #007BFF;
+        }
+
+        #download-button:hover {
+            background-color: #0056b3;
+        }
+
+        .text-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dropdown-button {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .dropdown-button:hover {
+            background-color: #3e8e41;
+        }
+
+        .dropdown-menu {
+            padding: 10px;
+            position: relative;
+            background-color: rgb(68, 68, 68);
+            border: 1px solid rgb(85, 85, 85);
+            border-radius: 10px;
+            box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 10px;
+            display: none;
+        }
+
+        .dropdown-menu li {
+            list-style-type: none;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .dropdown-menu li a {
+            list-style-type: none;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .dropdown-menu li a:hover {
+            list-style-type: none;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="text-header">
+        <h1 class="title" align="center">Озвучить текст</h1>
+        <button class="dropdown-button" data-example="yandex">Яндекс переводчик</button>
+        <ul class="dropdown-menu">
+            <li><a id="yandex">Яндекс переводчик</a></li>
+            <li><a id="google">Google переводчик</a></li>
+        </ul>
+    </div>
+    <div class="text-container">
+        <textarea id="text-input" placeholder="Текст для озвучки..."></textarea>
+        <div class="btn-area">
+            <button id="speak-button" class="button send">Озвучить</button>
+            <button id="download-button" class="button" style="display:none;">Скачать</button>
+        </div>
+    </div>
+    <audio id="audio" controls style="display:none;"></audio>
+</body>
+<script>
+    $(document).ready(function() {
+        let audioURL;
+        $('.dropdown-button').click(function() {
+            $(this).next('.dropdown-menu').toggle();
+        });            
+        $('.dropdown-menu a').click(function() {
+            var id = $(this).attr('id');
+            var text = $(this).text();
+            $('.dropdown-button').text(text);
+            $('.dropdown-button').attr('data-example', id);
+            $('.dropdown-menu').hide();
+        });
+        $('#speak-button').click(function() {
+            var text = $('#text-input').val();
+            var method = $('.dropdown-button').attr('data-example');
+            
+            if (text.trim() === '') {
+                alert('Пожалуйста, введите текст для озвучивания.');
+                return;
+            }
+            
+            if(method == 'yandex'){
+                var apiKey = 'null';
+                audioURL = 'https://tts.voicetech.yandex.net/generate?text=' + encodeURIComponent(text) + '&lang=ru-RU&format=mp3&speaker=oksana&key=' + apiKey;                    
+            }
+            if(method == 'google'){
+                audioURL = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURIComponent(text) + '&tl=ru&client=gtx';                   
+            }
+            
+            $('#audio').attr('src', audioURL);
+            $('#audio')[0].play();
+            $('#download-button').show();
+        });
+        $('#download-button').click(function() {
+            if (audioURL) {
+                var a = document.createElement('a');
+                a.href = audioURL;
+                a.download = 'audio.mp3';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+    });
+</script>
+
+</html>
